@@ -109,16 +109,20 @@
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="stat-card">
-                    <h3><a href="{% url 'paid_companies' %}">Total Paid Amount</a></h3>
-                    <p>${{ total_paid_amount }}</p>
-                </div>
+                <a href="{% url 'unpaid_companies' %}">
+                    <div class="stat-card">
+                        <h3>Total Paid Amount</h3>
+                        <p>${{ total_paid_amount }}</p>
+                    </div>
+                    </a>
             </div>
             <div class="col-md-4">
+                <a href="{% url 'unpaid_companies' %}">
                 <div class="stat-card">
-                    <h3><a href="{% url 'unpaid_companies' %}">Total Unpaid Amount</a></h3>
+                    <h3>Total Unpaid Amount</h3>
                     <p>${{ total_unpaid_amount }}</p>
                 </div>
+                </a>
             </div>
         </div>
         <h2 class="mt-5">Companies</h2>

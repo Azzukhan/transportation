@@ -70,62 +70,56 @@ def download_invoice(request, company_id):
         if driver_name:
             trips = trips.filter(driver__icontains=driver_name)
 
-    total_invoice_amount = trips.aggregate(Sum('amount'))['amount__sum']
-    total_amount_include_vat = Decimal('0.00')
-    total_vat_amount = Decimal('0.00')
-    total_toll_amount = Decimal('0.00')
+        total_invoice_amount = trips.aggregate(Sum('amount'))['amount__sum']
+        total_amount_include_vat = Decimal('0.00')
+        total_vat_amount = Decimal('0.00')
+        total_toll_amount = Decimal('0.00')
 
-    for trip in trips:
-        # Calculate VAT and total amount for each trip
-        trip.vat = trip.amount * Decimal('0.05')
-        trip.total_amount = trip.amount + trip.vat + trip.toll_gate
-        total_amount_include_vat += trip.total_amount
-        total_vat_amount += trip.vat
-        total_toll_amount += trip.toll_gate
-        trip.paid = True  # Mark trip as paid
-        trip.save()
+        for trip in trips:
+            # Calculate VAT and total amount for each trip
+            trip.vat = trip.amount * Decimal('0.05')
+            trip.total_amount = trip.amount + trip.vat + trip.toll_gate
+            total_amount_include_vat += trip.total_amount
+            total_vat_amount += trip.vat
+            total_toll_amount += trip.toll_gate
+            trip.paid = True
 
-    # Calculate total paid amount for the company
-    total_paid_amount = Trip.objects.filter(company=company, paid=True).aggregate(Sum('amount'))['amount__sum']
-    
-    if not total_paid_amount:
-        total_paid_amount = Decimal('0.00')
+            # Update company amounts
+            company.paid_amount += trip.total_amount
+            company.unpaid_amount -= trip.total_amount
 
-    # Update company.paid with total paid amount
-    # Update paid_amount
-    company.paid_amount += total_paid_amount
-    
-    # Deduct from unpaid_amount
-    company.unpaid_amount -= total_paid_amount
-    
-    # Save the updated company object
-    company.save()
+            # Save changes
+            company.save()
+            trip.save()
 
-    # Generate Invoice PDF
-    context = {
-        'company': company,
-        'trips': trips,
-        'total_amount_include_vat': total_amount_include_vat,
-        'total_vat_amount': total_vat_amount,
-        'total_amount':total_invoice_amount,
-        'total_toll_amount':total_toll_amount,
-        'invoice_date': datetime.now(),
-        'invoice_number': generate_invoice_number()  # You need to implement this function
-    }
+        # Generate Invoice PDF
+        context = {
+            'company': company,
+            'trips': trips,
+            'total_amount_include_vat': total_amount_include_vat,
+            'total_vat_amount': total_vat_amount,
+            'total_amount': total_invoice_amount,
+            'total_toll_amount': total_toll_amount,
+            'invoice_date': datetime.now(),
+            'invoice_number': generate_invoice_number()  # Implement this function as needed
+        }
 
-    html = render_to_string('invoice_template.html', context)
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="invoice_{company.id}.pdf"'
+        html = render_to_string('invoice_template.html', context)
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="invoice_{company.id}.pdf"'
 
-    pisa_status = pisa.CreatePDF(
-        html, dest=response, encoding='utf-8',
-        link_callback=fetch_resources  # Define fetch_resources function as needed
-    )
+        pisa_status = pisa.CreatePDF(
+            html, dest=response, encoding='utf-8',
+            link_callback=fetch_resources  # Define fetch_resources function as needed
+        )
 
-    if pisa_status.err:
-        return HttpResponse('Error generating PDF: %s' % html)
+        if pisa_status.err:
+            return HttpResponse('Error generating PDF: %s' % html)
 
-    return response
+        return response
+
+    return render(request, 'download_invoice.html', {'company': company})
+
     
 
 def login(request):
@@ -180,10 +174,14 @@ def add_trip(request):
         form = TripForm(request.POST)
         if form.is_valid():
             trip = form.save(commit=False)  # Save the form data but don't commit to database yet
+            trip.vat = trip.amount * Decimal('0.05')
+            trip.total_amount = trip.amount + trip.vat + trip.toll_gate
             trip.save()  # Commit the trip to database
+
             # Update the unpaid_amount of the associated company
-            trip.company.unpaid_amount += trip.amount
+            trip.company.unpaid_amount += trip.total_amount
             trip.company.save()
+
             messages.success(request, 'Trip added successfully.')
             return redirect('add_trip')
         else:
@@ -191,6 +189,7 @@ def add_trip(request):
     else:
         form = TripForm()
     return render(request, 'add_trip.html', {'form': form})
+
 
 
 @login_required
@@ -423,19 +422,24 @@ def error_404(request):
 def paid_companies(request):
     companies = Company.objects.annotate(total_paid_amount=Sum('trip__amount', filter=Q(trip__paid=True)))
     total_paid_amount = companies.aggregate(Sum('total_paid_amount'))['total_paid_amount__sum']
+    total_unpaid_amount = companies.aggregate(Sum('unpaid_amount'))['unpaid_amount__sum']
 
     context = {
         'companies': companies,
         'total_paid_amount': total_paid_amount,
+        'total_unpaid_amount': total_unpaid_amount,
     }
     return render(request, 'paid_companies.html', context)
 
 def unpaid_companies(request):
     companies = Company.objects.annotate(total_unpaid_amount=Sum('trip__amount', filter=Q(trip__paid=False)))
-    total_unpaid_amount = companies.aggregate(Sum('total_unpaid_amount'))['total_unpaid_amount__sum']
+    total_paid_amount = companies.aggregate(Sum('paid_amount'))['paid_amount__sum']
+    total_unpaid_amount = companies.aggregate(Sum('unpaid_amount'))['unpaid_amount__sum']
 
     context = {
         'companies': companies,
+        'total_paid_amount': total_paid_amount,
         'total_unpaid_amount': total_unpaid_amount,
+
     }
     return render(request, 'unpaid_companies.html', context)

@@ -10,7 +10,6 @@ class Company(models.Model):
     paid_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     unpaid_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     po_box = models.CharField(max_length=20)  
-    trn_number = models.CharField(max_length=30)
 
     def __str__(self):
         return self.name

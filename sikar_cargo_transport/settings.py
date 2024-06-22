@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-(ygcjvus0-c^*zt02^-dhu_&1n!ds=l=mm+bca-+go57o7m)1w
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*','1448-2401-4900-7d71-1334-7d68-dec7-431b-33ba.ngrok-free.app']
+ALLOWED_HOSTS = ['*','b86c-2401-4900-7d70-bacd-c34-b818-85ea-463d.ngrok-free.app']
 
 
 # Application definition
@@ -74,6 +74,13 @@ WSGI_APPLICATION = 'sikar_cargo_transport.wsgi.application'
 
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://b86c-2401-4900-7d70-bacd-c34-b818-85ea-463d.ngrok-free.app",
+    # Add other trusted origins as needed
+]
+
+CSRF_COOKIE_SECURE = False
+CSRF_COOKIE_HTTPONLY = False
 
 
 

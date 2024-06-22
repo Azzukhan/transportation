@@ -115,6 +115,7 @@
                 <thead>
                     <tr>
                         <th>Company Name</th>
+                        <th>Total Paid Amount</th>
                         <th>Total Unpaid Amount</th>
                         <th>Action</th>
                     </tr>
@@ -123,14 +124,16 @@
                     {% for company in companies %}
                     <tr>
                         <td>{{ company.name }}</td>
-                        <td>${{ company.total_unpaid_amount|default:"0.00" }}</td>
+                        <td>${{ company.paid_amount|default:"0.00" }}</td>
+                        <td>${{ company.unpaid_amount|default:"0.00" }}</td>
                         <td><a href="{% url 'company_detail' company_id=company.id %}"><button class="btn btn-primary action-button">View Details</button></a></td>
                     </tr>
                     {% endfor %}
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td colspan="2" style="text-align: right;"><strong>Total Unpaid Amount for All Companies:</strong></td>
+                        <td colspan="1" style="text-align: right;"><strong></strong></td>
+                        <td><strong>${{ total_paid_amount|default:"0.00" }}</strong></td>
                         <td><strong>${{ total_unpaid_amount|default:"0.00" }}</strong></td>
                     </tr>
                 </tfoot>

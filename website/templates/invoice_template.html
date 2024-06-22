@@ -77,7 +77,7 @@
         <p>Tel: {{ company.phone }}</p>
         <p>{{ company.address}}</p>
         <p>PO Box:  {{ company.po_box }}</p>
-        <p>TRN: {{ company.trn_number }}</p>
+        <p>TRN: 100390368400003</p>
     </div>
 
     <h2 class="invoice-title">TAX INVOICE</h2>
@@ -86,7 +86,7 @@
         <p><b>Atten:- Mr. {{company.contact_person}}</b></p>
         <p><b>Invoice No: {{ invoice_number }}</b></p>
         <p>Invoice Date: {{ invoice_date|date:"d-M-Y" }}</p>
-        <p><b>TRN:- </b>{{company.trn_number}}</p>
+        <p><b>TRN:- </b>100390368400003</p>
     </div>
 
     <table class="invoice-table" style="width:100%">
@@ -117,7 +117,7 @@
             {% endfor %}
             <tr>
                 <td colspan="3"></td>
-                <td>{{ total_amount|floatformat:"2" }}/</td>
+                <td>{{ total_amount|default:"0.00" }}</td>
                 <td> {{ total_vat_amount|floatformat:"2" }}</td>
                 <td>{{total_toll_amount|floatformat:"2"}}</td>
                 <td>{{ total_amount_include_vat|floatformat:"2" }}</td>
