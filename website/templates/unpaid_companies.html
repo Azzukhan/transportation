@@ -122,8 +122,8 @@
                     {% for company in companies %}
                     <tr>
                         <td>{{ company.name }}</td>
-                        <td>${{ company.paid_amount|default:"0.00" }}</td>
-                        <td>${{ company.unpaid_amount|default:"0.00" }}</td>
+                        <td>{{ company.paid_amount|default:"0.00" }} AED</td>
+                        <td>{{ company.unpaid_amount|default:"0.00" }} AED</td>
                         <td><a href="{% url 'company_detail' company_id=company.id %}"><button class="btn btn-primary action-button">View Details</button></a></td>
                     </tr>
                     {% endfor %}
@@ -131,8 +131,8 @@
                 <tfoot>
                     <tr>
                         <td colspan="1" style="text-align: right;"><strong></strong></td>
-                        <td><strong>${{ total_paid_amount|default:"0.00" }}</strong></td>
-                        <td><strong>${{ total_unpaid_amount|default:"0.00" }}</strong></td>
+                        <td><strong>{{ total_paid_amount|default:"0.00" }} AED</strong></td>
+                        <td><strong>{{ total_unpaid_amount|default:"0.00" }} AED</strong></td>
                     </tr>
                 </tfoot>
             </table>
