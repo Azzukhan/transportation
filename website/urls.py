@@ -19,4 +19,6 @@ urlpatterns = [
     path('download_invoice/<int:company_id>/', views.download_invoice, name='download_invoice'),
     path('trip/<int:trip_id>/delete/', views.delete_trip, name='delete_trip'),
     path('trip/<int:trip_id>/update/', views.update_trip, name='update_trip'),
+    path('paid-companies/', views.paid_companies, name='paid_companies'),
+    path('unpaid-companies/', views.unpaid_companies, name='unpaid_companies'),
 ]

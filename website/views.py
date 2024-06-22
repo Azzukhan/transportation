@@ -9,7 +9,7 @@ from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.decorators import login_required
 from .forms import CompanyForm, TripForm, LoginRequestForm
 from .models import Company, Trip, Invoice
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from datetime import datetime
 from django.contrib import messages
 from django.http import HttpResponse
@@ -92,7 +92,13 @@ def download_invoice(request, company_id):
         total_paid_amount = Decimal('0.00')
 
     # Update company.paid with total paid amount
-    company.paid_amount = total_paid_amount
+    # Update paid_amount
+    company.paid_amount += total_paid_amount
+    
+    # Deduct from unpaid_amount
+    company.unpaid_amount -= total_paid_amount
+    
+    # Save the updated company object
     company.save()
 
     # Generate Invoice PDF
@@ -266,50 +272,90 @@ def index(request):
 
             # Construct the email message
             subject = 'New Quote Request'
-            message = "hello"
+            message = "Hello"
             html_content = render_to_string('email.html', {
-                'some_params': {
-                    'name': name,
-                    'email': email,
-                    'mobile': mobile,
-                    'freight': freight,
-                    'origin': origin,
-                    'destination': destination,
-                    'note': note,
-                }
+                'name': name,
+                'email': email,
+                'mobile': mobile,
+                'freight': freight,
+                'origin': origin,
+                'destination': destination,
+                'note': note,
             })
-            recipient_list = ["mdafjalk62@gmail.com"]
-            from_email = "MS_fjvWs4@trial-pxkjn41pyw94z781.mlsender.net" # Replace with your email address
-            
+            recipient_list = ["aak5471@gmail.com"]
+            from_email = "MS_fjvWs4@trial-pxkjn41pyw94z781.mlsender.net"  # Replace with your email address
+
             try:
                 with get_connection(
-                host=settings.EMAIL_HOST,
-                port=settings.EMAIL_PORT,
-                username=settings.EMAIL_HOST_USER,
-                password=settings.EMAIL_HOST_PASSWORD,
-                use_tls=True,
+                        host=settings.EMAIL_HOST,
+                        port=settings.EMAIL_PORT,
+                        username=settings.EMAIL_HOST_USER,
+                        password=settings.EMAIL_HOST_PASSWORD,
+                        use_tls=True,
                 ) as connection:
-                    r = EmailMultiAlternatives(
-                  subject=subject,
-                  body=message,
-                  to=recipient_list,
-                  from_email=from_email,
-                  connection=connection)
-                    r.attach_alternative(html_content, "email.html")
-                    r.send(fail_silently=False)
+                    email_message = EmailMultiAlternatives(
+                        subject=subject,
+                        body=message,
+                        to=recipient_list,
+                        from_email=from_email,
+                        connection=connection
+                    )
+                    email_message.attach_alternative(html_content, "text/html")
+                    email_message.send(fail_silently=False)
                 return redirect('service')
             except Exception as e:
                 form.add_error(None, f'Error sending email: {e}')
-                print("error",e)
+                print("Error:", e)
     else:
         form = QuoteRequestForm()
 
-    return render(request, 'index.html', {'form':form})
+    return render(request, 'index.html', {'form': form, 'user': request.user})
 
 def about(request):
     return render(request, 'about.html')
 
 def contact(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        subject = request.POST.get('subject')
+        phone = request.POST.get('phone')
+        message = request.POST.get('message')
+
+        # Construct the email message
+        email_subject = 'New Contact Form Submission'
+        email_message = f"Name: {name}\nEmail: {email}\nSubject: {subject}\nPhone: {phone}\nMessage: {message}"
+        html_content = render_to_string('email_template.html', {
+            'name': name,
+            'email': email,
+            'subject': subject,
+            'phone': phone,
+            'message': message,
+        })
+        recipient_list = ["aak5471@gmail.com"]
+        from_email = "MS_fjvWs4@trial-pxkjn41pyw94z781.mlsender.net"  # Ensure this is set in your settings
+
+        try:
+            with get_connection(
+                    host=settings.EMAIL_HOST,
+                    port=settings.EMAIL_PORT,
+                    username=settings.EMAIL_HOST_USER,
+                    password=settings.EMAIL_HOST_PASSWORD,
+                    use_tls=True,
+            ) as connection:
+                email = EmailMultiAlternatives(
+                    subject=email_subject,
+                    body=email_message,
+                    to=recipient_list,
+                    from_email=from_email,
+                    connection=connection
+                )
+                email.attach_alternative(html_content, "text/html")
+                email.send(fail_silently=False)
+            return render(request, 'contact.html', {'success': True})
+        except Exception as e:
+            return render(request, 'contact.html', {'error': str(e)})
+
     return render(request, 'contact.html')
 
 def service(request):
@@ -332,41 +378,40 @@ def quote(request):
 
             # Construct the email message
             subject = 'New Quote Request'
-            message = f"Hello Sikar Cargo Transport"
+            message = "Hello"
             html_content = render_to_string('email.html', {
-                'some_params': {
-                    'name': name,
-                    'email': email,
-                    'mobile': mobile,
-                    'freight': freight,
-                    'origin': origin,
-                    'destination': destination,
-                    'note': note,
-                }
+                'name': name,
+                'email': email,
+                'mobile': mobile,
+                'freight': freight,
+                'origin': origin,
+                'destination': destination,
+                'note': note,
             })
-            recipient_list = ["mdafjalk62@gmail.com"]
-            from_email = "MS_fjvWs4@trial-pxkjn41pyw94z781.mlsender.net" # Replace with your email address
-            
+            recipient_list = ["aak5471@gmail.com"]
+            from_email = "MS_fjvWs4@trial-pxkjn41pyw94z781.mlsender.net"  # Replace with your email address
+
             try:
                 with get_connection(
-                host=settings.EMAIL_HOST,
-                port=settings.EMAIL_PORT,
-                username=settings.EMAIL_HOST_USER,
-                password=settings.EMAIL_HOST_PASSWORD,
-                use_tls=True,
+                        host=settings.EMAIL_HOST,
+                        port=settings.EMAIL_PORT,
+                        username=settings.EMAIL_HOST_USER,
+                        password=settings.EMAIL_HOST_PASSWORD,
+                        use_tls=True,
                 ) as connection:
-                    r = EmailMessage(
-                  subject=subject,
-                  body=message,
-                  to=recipient_list,
-                  from_email=from_email,
-                  html_message=html_content,
-                  connection=connection).send()
-                print(r)
+                    email_message = EmailMultiAlternatives(
+                        subject=subject,
+                        body=message,
+                        to=recipient_list,
+                        from_email=from_email,
+                        connection=connection
+                    )
+                    email_message.attach_alternative(html_content, "text/html")
+                    email_message.send(fail_silently=False)
                 return redirect('service')
             except Exception as e:
                 form.add_error(None, f'Error sending email: {e}')
-                print("error",e)
+                print("Error:", e)
     else:
         form = QuoteRequestForm()
 
@@ -374,3 +419,23 @@ def quote(request):
 
 def error_404(request):
     return render(request, '404.html')
+
+def paid_companies(request):
+    companies = Company.objects.annotate(total_paid_amount=Sum('trip__amount', filter=Q(trip__paid=True)))
+    total_paid_amount = companies.aggregate(Sum('total_paid_amount'))['total_paid_amount__sum']
+
+    context = {
+        'companies': companies,
+        'total_paid_amount': total_paid_amount,
+    }
+    return render(request, 'paid_companies.html', context)
+
+def unpaid_companies(request):
+    companies = Company.objects.annotate(total_unpaid_amount=Sum('trip__amount', filter=Q(trip__paid=False)))
+    total_unpaid_amount = companies.aggregate(Sum('total_unpaid_amount'))['total_unpaid_amount__sum']
+
+    context = {
+        'companies': companies,
+        'total_unpaid_amount': total_unpaid_amount,
+    }
+    return render(request, 'unpaid_companies.html', context)

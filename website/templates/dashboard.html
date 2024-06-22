@@ -90,25 +90,16 @@
         <div class="collapse navbar-collapse" id="navbarCollapse">
             <div class="navbar-nav ms-auto p-4 p-lg-0">
                 <a href="{% url 'index' %}" class="nav-item nav-link">Home</a>
-                <a href="{% url 'about' %}" class="nav-item nav-link">About</a>
-                <a href="{% url 'service' %}" class="nav-item nav-link">Services</a>
-                <a href="{% url 'dashboard' %}" class="nav-item nav-link active">Dashboard</a>
-                <div class="nav-item dropdown">
-                    <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Admin</a>
-                    <div class="dropdown-menu fade-up m-0">
-                        <a href="{% url 'add_company' %}" class="dropdown-item">Add Company</a>
-                        <a href="{% url 'add_trip' %}" class="dropdown-item">Add Trip</a>
-                        <a href="{% url 'admin_login' %}" class="dropdown-item">Admin Login</a>
-                    </div>
-                </div>
-                <a href="{% url 'contact' %}" class="nav-item nav-link">Contact</a>
+                <a href="{% url 'dashboard' %}" class="nav-item nav-link">Dashboard</a>
+                <a href="{% url 'add_company' %}" class="nav-item nav-link">Add Company</a>
+                <a href="{% url 'add_trip' %}" class="nav-item nav-link">Add Trip</a>
+                <a href="{% url 'admin_login' %}" class="nav-item nav-link">Admin Login</a>
             </div>
             <h4 class="m-0 pe-lg-5 d-none d-lg-block"><i class="fa fa-headphones text-primary me-3"></i>+971 55 251 6492</h4>
         </div>
     </nav>
     <!-- Navbar End -->
 
-    <!-- Dashboard Start -->
     <div class="container dashboard-container">
         <div class="row">
             <div class="col-md-4">
@@ -119,13 +110,13 @@
             </div>
             <div class="col-md-4">
                 <div class="stat-card">
-                    <h3>Total Paid Amount</h3>
+                    <h3><a href="{% url 'paid_companies' %}">Total Paid Amount</a></h3>
                     <p>${{ total_paid_amount }}</p>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="stat-card">
-                    <h3>Total Unpaid Amount</h3>
+                    <h3><a href="{% url 'unpaid_companies' %}">Total Unpaid Amount</a></h3>
                     <p>${{ total_unpaid_amount }}</p>
                 </div>
             </div>
