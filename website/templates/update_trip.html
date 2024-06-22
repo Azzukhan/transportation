@@ -1,0 +1,53 @@
+{% load static %}
+{% load crispy_forms_tags %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Trip</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Update Trip</h1>
+        <form method="post">
+            {% csrf_token %}
+            <div class="row g-3">
+                <div class="col-12 col-sm-6">
+                    {{ form.company|as_crispy_field }}
+                </div>
+                <div class="col-12 col-sm-6">
+                    {{ form.date|as_crispy_field }}
+                </div>
+                <div class="col-12 col-sm-6">
+                    {{ form.freight|as_crispy_field }}
+                </div>
+                <div class="col-12 col-sm-6">
+                    {{ form.origin|as_crispy_field }}
+                </div>
+                <div class="col-12">
+                    {{ form.destination|as_crispy_field }}
+                </div>
+                <div class="col-12">
+                    {{ form.amount|as_crispy_field }}
+                </div>
+                <div class="col-12">
+                    {{ form.driver|as_crispy_field }}
+                </div>
+                <div class="col-12">
+                    {{ form.toll_gate|as_crispy_field }}
+                </div>
+                <div class="col-12">
+                    <button class="btn btn-primary w-100 py-3" type="submit">Submit</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+</body>
+
+</html>

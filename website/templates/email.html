@@ -1,0 +1,48 @@
+<!-- templates/email.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Quote Request</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #333;
+        }
+        p {
+            margin-bottom: 10px;
+        }
+        .highlight {
+            font-weight: bold;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>New Quote Request</h2>
+        <p><span class="highlight">Name:</span> {{ some_params.name }}</p>
+        <p><span class="highlight">Email:</span> {{ some_params.email }}</p>
+        <p><span class="highlight">Mobile:</span> {{ some_params.mobile }}</p>
+        <p><span class="highlight">Freight:</span> {{ some_params.freight }}</p>
+        <p><span class="highlight">Origin:</span> {{ some_params.origin }}</p>
+        <p><span class="highlight">Destination:</span> {{ some_params.destination }}</p>
+        <p><span class="highlight">Note:</span> {{ some_params.note }}</p>
+    </div>
+</body>
+</html>
