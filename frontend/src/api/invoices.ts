@@ -15,6 +15,7 @@ export const createInvoice = async (payload: InvoiceCreateInput): Promise<Invoic
     end_date: payload.endDate,
     due_date: payload.dueDate,
     format_key: payload.formatKey,
+    trip_ids: payload.tripIds ?? [],
   });
   return response.data;
 };
@@ -24,10 +25,7 @@ export const markInvoicePaid = async (invoiceId: number): Promise<InvoiceApi> =>
   return response.data;
 };
 
-export const downloadInvoicePdf = async (
-  invoiceId: number,
-  templateKey?: string,
-): Promise<Blob> => {
+export const downloadInvoicePdf = async (invoiceId: number, templateKey?: string): Promise<Blob> => {
   const response = await apiClient.get<Blob>(`/invoices/${invoiceId}/pdf`, {
     params: templateKey ? { template: templateKey } : undefined,
     responseType: "blob",

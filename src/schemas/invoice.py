@@ -10,10 +10,11 @@ from src.schemas.common import ORMModel
 
 class InvoiceCreate(ORMModel):
     company_id: int
-    start_date: date
-    end_date: date
+    start_date: date | None = None
+    end_date: date | None = None
     due_date: date | None = None
     format_key: str = Field(default="standard", max_length=50)
+    trip_ids: list[int] = Field(default_factory=list)
 
 
 class InvoiceRead(ORMModel):

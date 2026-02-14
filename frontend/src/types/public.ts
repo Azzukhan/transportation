@@ -1,36 +1,25 @@
-export type ContactRequestInput = {
-  name: string;
-  email: string;
-  phone: string;
-  subject: string;
-  message: string;
-  sourcePage?: string;
-};
-
-export type ContactRequestApi = {
+export interface ContactRequestApi {
   id: number;
   name: string;
   email: string;
   phone: string;
   subject: string;
   message: string;
-  status: string;
   source_page: string;
-  created_at: string;
-  updated_at: string;
-};
+  status: string;
+  created_at?: string;
+}
 
-export type QuoteRequestInput = {
+export interface ContactRequestInput {
   name: string;
   email: string;
-  mobile: string;
-  freight: string;
-  origin: string;
-  destination: string;
-  note?: string;
-};
+  phone: string;
+  subject: string;
+  message: string;
+  sourcePage?: string;
+}
 
-export type QuoteRequestApi = {
+export interface QuoteRequestApi {
   id: number;
   name: string;
   email: string;
@@ -40,6 +29,15 @@ export type QuoteRequestApi = {
   destination: string;
   note: string;
   status: string;
-  created_at: string;
-  updated_at: string;
-};
+  created_at?: string;
+}
+
+export interface QuoteRequestInput {
+  name: string;
+  email: string;
+  mobile: string;
+  freight: string;
+  origin: string;
+  destination: string;
+  note?: string;
+}

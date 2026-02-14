@@ -16,10 +16,7 @@ export const listCompanies = async (): Promise<CompanyApi[]> => {
 };
 
 export const createCompany = async (payload: CompanyCreateInput): Promise<CompanyApi> => {
-  const response = await apiClient.post<CompanyApi>(
-    "/companies",
-    mapCompanyCreatePayload(payload),
-  );
+  const response = await apiClient.post<CompanyApi>("/companies", mapCompanyCreatePayload(payload));
   return response.data;
 };
 

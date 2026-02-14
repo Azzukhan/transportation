@@ -1,4 +1,4 @@
-export type CompanyApi = {
+export interface CompanyApi {
   id: number;
   name: string;
   address: string;
@@ -6,33 +6,15 @@ export type CompanyApi = {
   phone: string;
   contact_person: string;
   po_box: string;
-  paid_amount: string;
-  unpaid_amount: string;
-};
+  created_at?: string;
+  updated_at?: string;
+}
 
-export type Company = {
-  id: number;
+export interface CompanyCreateInput {
   name: string;
   address: string;
   email: string;
   phone: string;
   contactPerson: string;
   poBox: string;
-  paidAmount: number;
-  unpaidAmount: number;
-};
-
-export type CompanyCreateInput = {
-  name: string;
-  address: string;
-  email: string;
-  phone: string;
-  contactPerson: string;
-  poBox: string;
-};
-
-export type CompanyDashboardSummary = {
-  totalCompanies: number;
-  totalPaidAmount: number;
-  totalUnpaidAmount: number;
-};
+}

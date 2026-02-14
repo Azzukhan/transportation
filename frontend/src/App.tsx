@@ -1,141 +1,76 @@
-import { Button, Card, Form, Input, Typography } from "antd";
-import { ConfigProvider } from "antd";
-import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
-import { useAppDispatch } from "./app/hooks";
-import { loginUser } from "./api/authentication";
-import { AppLayout } from "./components/Layout/AppLayout";
-import { ProtectedRoute } from "./components/ProtectedRoute";
-import { LogoLockup } from "./components/Brand/LogoLockup";
-import { PublicShell } from "./components/Public/PublicShell";
-import { onLoginSuccess } from "./features/auth/authSlice";
-import {
-  AboutRoute,
-  AddCompanyRoute,
-  AddTripRoute,
-  ContactRoute,
-  ContactRequestsRoute,
-  DashboardRoute,
-  FeatureRoute,
-  HomeRoute,
-  LiveOperationsRoute,
-  PaidCompaniesRoute,
-  QuoteRequestsRoute,
-  QuoteRoute,
-  ServiceDetailRoute,
-  ServiceRoute,
-  UnpaidCompaniesRoute,
-} from "./routes";
-import { toast } from "./utils";
+import { PublicLayout } from "@/components/Layout/PublicLayout";
+import { AdminLayout } from "@/components/Layout/AdminLayout";
 
-const { Title, Paragraph } = Typography;
-type LoginFormValues = { username: string; password: string };
+import HomePage from "@/pages/HomePage";
+import AboutPage from "@/pages/AboutPage";
+import ContactPage from "@/pages/ContactPage";
+import { ServiceListPage, ServiceDetailPage } from "@/pages/ServicePages";
+import QuotePage from "@/pages/QuotePage";
+import LiveOperationsPage from "@/pages/LiveOperationsPage";
+import LoginPage from "@/pages/LoginPage";
 
-const NotFoundPage = () => (
-  <Card>
-    <Title level={3}>Not Found</Title>
-    <Paragraph>The page you requested does not exist.</Paragraph>
-  </Card>
+import DashboardPage from "@/pages/admin/DashboardPage";
+import AddCompanyPage from "@/pages/admin/AddCompanyPage";
+import AddTripPage from "@/pages/admin/AddTripPage";
+import CreateInvoicePage from "@/pages/admin/CreateInvoicePage";
+import CreateQuotePage from "@/pages/admin/CreateQuotePage";
+import CompaniesPage from "@/pages/admin/CompaniesPage";
+import ContactRequestsPage from "@/pages/admin/ContactRequestsPage";
+import QuoteRequestsPage from "@/pages/admin/QuoteRequestsPage";
+import NotFound from "@/pages/NotFound";
+
+const queryClient = new QueryClient();
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            {/* Public routes */}
+            <Route element={<PublicLayout />}>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/service" element={<ServiceListPage />} />
+              <Route path="/service/:slug" element={<ServiceDetailPage />} />
+              <Route path="/live-operations" element={<LiveOperationsPage />} />
+              <Route path="/quote" element={<QuotePage />} />
+            </Route>
+
+            {/* Auth */}
+            <Route path="/login" element={<LoginPage />} />
+
+            {/* Protected admin routes */}
+            <Route element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/add_company" element={<AddCompanyPage />} />
+              <Route path="/add_trip" element={<AddTripPage />} />
+              <Route path="/create-invoice" element={<CreateInvoicePage />} />
+              <Route path="/create-quote" element={<CreateQuotePage />} />
+              <Route path="/paid-companies" element={<CompaniesPage status="paid" />} />
+              <Route path="/unpaid-companies" element={<CompaniesPage status="unpaid" />} />
+              <Route path="/contact-requests" element={<ContactRequestsPage />} />
+              <Route path="/quote-requests" element={<QuoteRequestsPage />} />
+            </Route>
+
+            <Route path="/404" element={<NotFound />} />
+            <Route path="*" element={<Navigate to="/404" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
+  </QueryClientProvider>
 );
 
-const LoginPage = () => {
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const redirectParam = new URLSearchParams(location.search).get("redirect");
-  const redirectTo = redirectParam ? decodeURIComponent(redirectParam) : "/dashboard";
-
-  const [form] = Form.useForm<LoginFormValues>();
-
-  const handleLogin = async (values: LoginFormValues): Promise<void> => {
-    try {
-      const result = await loginUser(values);
-      dispatch(onLoginSuccess(result));
-      navigate(redirectTo, { replace: true });
-    } catch {
-      toast.error("Login failed. Please check your credentials.");
-    }
-  };
-
-  return (
-    <main className="login-screen">
-      <Card className="login-card">
-        <div className="login-brand">
-          <LogoLockup size="lg" subtitle="Admin Workspace" />
-        </div>
-        <Title level={3}>Login</Title>
-        <Paragraph>Sign in to access admin operations, invoicing, and request management.</Paragraph>
-        <Form<LoginFormValues>
-          layout="vertical"
-          form={form}
-          onFinish={(values) => void handleLogin(values)}
-          style={{ marginTop: 12 }}
-        >
-          <Form.Item label="Username" name="username" rules={[{ required: true }]}>
-            <Input autoComplete="username" />
-          </Form.Item>
-          <Form.Item label="Password" name="password" rules={[{ required: true }]}>
-            <Input.Password autoComplete="current-password" />
-          </Form.Item>
-          <Button type="primary" htmlType="submit">
-            Login
-          </Button>
-        </Form>
-      </Card>
-    </main>
-  );
-};
-
-const ProtectedAppShell = () => (
-  <ProtectedRoute>
-    <AppLayout>
-      <Outlet />
-    </AppLayout>
-  </ProtectedRoute>
-);
-
-export const App = () => {
-  return (
-    <ConfigProvider
-      theme={{
-        token: {
-          colorPrimary: "#1f5da7",
-          borderRadius: 10,
-          colorText: "#10253b",
-          colorTextSecondary: "#4f6278",
-          colorBgContainer: "#ffffff",
-        },
-      }}
-    >
-      <BrowserRouter>
-        <Routes>
-          <Route element={<PublicShell />}>
-            <Route path="/" element={<HomeRoute />} />
-            <Route path="/about" element={<AboutRoute />} />
-            <Route path="/contact" element={<ContactRoute />} />
-            <Route path="/service" element={<ServiceRoute />} />
-            <Route path="/service/:slug" element={<ServiceDetailRoute />} />
-            <Route path="/live-operations" element={<LiveOperationsRoute />} />
-            <Route path="/feature" element={<FeatureRoute />} />
-            <Route path="/quote" element={<QuoteRoute />} />
-          </Route>
-          <Route path="/login" element={<LoginPage />} />
-
-          <Route element={<ProtectedAppShell />}>
-            <Route path="/dashboard" element={<DashboardRoute />} />
-            <Route path="/add_company" element={<AddCompanyRoute />} />
-            <Route path="/add_trip" element={<AddTripRoute />} />
-            <Route path="/paid-companies" element={<PaidCompaniesRoute />} />
-            <Route path="/unpaid-companies" element={<UnpaidCompaniesRoute />} />
-            <Route path="/contact-requests" element={<ContactRequestsRoute />} />
-            <Route path="/quote-requests" element={<QuoteRequestsRoute />} />
-          </Route>
-
-          <Route path="/404" element={<NotFoundPage />} />
-          <Route path="*" element={<Navigate to="/404" replace />} />
-        </Routes>
-      </BrowserRouter>
-    </ConfigProvider>
-  );
-};
+export default App;

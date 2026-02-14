@@ -1,4 +1,4 @@
-export type TripApi = {
+export interface TripApi {
   id: number;
   company_id: number;
   date: string;
@@ -7,13 +7,16 @@ export type TripApi = {
   destination: string;
   amount: string;
   toll_gate: string;
+  driver: string;
   vat: string;
   total_amount: string;
-  driver: string;
   paid: boolean;
-};
+  invoice_id: number | null;
+  created_at?: string;
+  company_name?: string;
+}
 
-export type TripCreateInput = {
+export interface TripCreateInput {
   companyId: number;
   date: string;
   freight: string;
@@ -22,4 +25,4 @@ export type TripCreateInput = {
   amount: number;
   tollGate: number;
   driver: string;
-};
+}

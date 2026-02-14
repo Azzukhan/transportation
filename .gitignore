@@ -1,18 +1,49 @@
-# Ignore Python virtual environment directory
-env/
+# OS / Editor
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+*.tmp
+*.temp
 
-# Ignore other common files and directories
+# Python
+.venv/
+venv/
+env/
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+.coverage
+coverage.xml
+htmlcov/
 *.sqlite3
-*.log
-.DS_Store
+db.sqlite3
 
-# Frontend artifacts
+# Logs
+*.log
+
+# Env files (keep examples)
+.env
+.env.*
+!.env.example
+
+# Frontend
 frontend/node_modules/
 frontend/dist/
+frontend/.vite/
+frontend/coverage/
+frontend/*.tsbuildinfo
 frontend/.env
-frontend/.env.local
-frontend/.env.*.local
+frontend/.env.*
+!frontend/.env.example
+frontend/.git/
+
+# Project temp / backups
+frontend_old/
