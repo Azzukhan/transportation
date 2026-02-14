@@ -1,0 +1,15 @@
+export { DashboardRoute } from "./dashboard";
+export { AddCompanyRoute } from "./addCompany";
+export { AddTripRoute } from "./addTrip";
+export { HomeRoute } from "./home";
+export { AboutRoute } from "./about";
+export { ContactRoute } from "./contact";
+export { QuoteRoute } from "./quote";
+export { ServiceRoute } from "./service";
+export { ServiceDetailRoute } from "./serviceDetail";
+export { FeatureRoute } from "./feature";
+export { LiveOperationsRoute } from "./liveOperations";
+export { PaidCompaniesRoute } from "./paidCompanies";
+export { UnpaidCompaniesRoute } from "./unpaidCompanies";
+export { ContactRequestsRoute } from "./contactRequests";
+export { QuoteRequestsRoute } from "./quoteRequests";

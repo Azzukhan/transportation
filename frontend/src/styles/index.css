@@ -1,0 +1,196 @@
+@import url("https://fonts.cdnfonts.com/css/geist");
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap");
+
+:root {
+  --brand-navy: #07243d;
+  --brand-blue: #0f5f8f;
+  --brand-blue-strong: #0a496d;
+  --brand-gold: #f2a93b;
+  --brand-teal: #17a2a4;
+  --brand-cyan: #27c6d1;
+  --text-primary: #0f2a42;
+  --text-secondary: #3f5d78;
+  --border-subtle: #c8d9e9;
+  --shadow-soft: 0 14px 36px rgba(10, 35, 58, 0.14);
+  --section-inline: clamp(14px, 2vw, 26px);
+
+  font-family: "Geist", "Plus Jakarta Sans", "Manrope", sans-serif;
+  color: var(--text-primary);
+  font-family: "Geist", "Plus Jakarta Sans", "Manrope", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: linear-gradient(180deg, #edf5ff 0%, #dfeaf9 46%, #eaf3ff 100%);
+  color: var(--text-primary);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.ant-typography h1,
+.ant-typography h2,
+.ant-typography h3,
+.ant-typography h4 {
+  font-family: "Geist", "Plus Jakarta Sans", "Manrope", sans-serif;
+  letter-spacing: -0.2px;
+}
+
+.ant-card {
+  border-radius: 16px;
+}
+
+.logo-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-mark-wrap {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(160deg, #f6fbff, #d8e9ff);
+  color: var(--brand-blue);
+  font-size: 21px;
+  border: 2px solid #a9c7ea;
+  box-shadow: inset 0 -7px 12px rgba(31, 93, 167, 0.1);
+}
+
+.logo-mark-dot {
+  position: absolute;
+  right: -4px;
+  top: -4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  background: var(--brand-gold);
+}
+
+.logo-mark-svg {
+  width: 22px;
+  height: 22px;
+}
+
+.logo-copy {
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.logo-copy .ant-typography {
+  margin: 0;
+}
+
+.logo-copy .ant-typography:first-child {
+  color: var(--brand-navy);
+}
+
+.logo-copy .ant-typography:last-child {
+  color: var(--text-secondary);
+}
+
+.logo-sm .logo-mark-wrap {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  font-size: 17px;
+}
+
+.logo-sm .logo-copy .ant-typography:first-child {
+  font-size: 14px;
+}
+
+.logo-sm .logo-copy .ant-typography:last-child {
+  font-size: 11px;
+}
+
+.logo-md .logo-copy .ant-typography:first-child {
+  font-size: 17px;
+}
+
+.logo-md .logo-copy .ant-typography:last-child {
+  font-size: 12px;
+}
+
+.logo-lg .logo-mark-wrap {
+  width: 56px;
+  height: 56px;
+  font-size: 24px;
+}
+
+.logo-lg .logo-copy .ant-typography:first-child {
+  font-size: 20px;
+}
+
+.logo-lg .logo-copy .ant-typography:last-child {
+  font-size: 13px;
+}
+
+.ant-btn {
+  border-radius: 11px;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: -0.1px;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.ant-btn-primary {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(150deg, #1eb8c1 0%, #0f6f9c 54%, #0a496d 100%);
+  border-color: #0f6f9c;
+  box-shadow: 0 10px 22px rgba(12, 87, 130, 0.3);
+}
+
+.ant-btn-primary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 25%, rgba(255, 255, 255, 0.28) 45%, transparent 65%);
+  transform: translateX(-130%);
+  transition: transform 0.45s ease;
+}
+
+.ant-btn-primary:hover {
+  background: linear-gradient(150deg, #21c9c9 0%, #1297bf 54%, #0f5f8f 100%);
+  border-color: #179db8;
+  transform: translateY(-2px);
+  box-shadow: 0 16px 25px rgba(12, 88, 127, 0.34);
+}
+
+.ant-btn-primary:hover::after {
+  transform: translateX(130%);
+}
+
+.login-screen {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: clamp(16px, 3vw, 26px);
+  background: linear-gradient(180deg, #f7fbff 0%, #edf4fc 100%);
+}
+
+.login-card {
+  width: min(470px, 100%);
+  border-radius: 22px;
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-soft);
+}
+
+.login-brand {
+  display: flex;
+  align-items: center;
+  margin-bottom: 14px;
+}
