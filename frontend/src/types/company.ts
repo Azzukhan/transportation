@@ -4,6 +4,7 @@ export interface CompanyApi {
   address: string;
   email: string;
   phone: string;
+  trn: string;
   contact_person: string;
   po_box: string;
   created_at?: string;
@@ -15,6 +16,7 @@ export interface CompanyCreateInput {
   address: string;
   email: string;
   phone: string;
+  trn: string;
   contactPerson: string;
   poBox: string;
 }

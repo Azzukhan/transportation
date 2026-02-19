@@ -1,12 +1,17 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from sqlalchemy import String, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.models.base import AuditMixin, BaseModel, IDMixin
+from src.models.base import AuditMixin, BaseModel, IDMixin, TransportCompanyMixin
+
+if TYPE_CHECKING:
+    from src.models.transport_company import TransportCompany
 
 
-class ContactRequest(IDMixin, AuditMixin, BaseModel):
+class ContactRequest(IDMixin, TransportCompanyMixin, AuditMixin, BaseModel):
     __tablename__ = "contact_requests"
 
     name: Mapped[str] = mapped_column(String(120), nullable=False)
@@ -16,3 +21,5 @@ class ContactRequest(IDMixin, AuditMixin, BaseModel):
     message: Mapped[str] = mapped_column(Text, nullable=False)
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="new")
     source_page: Mapped[str] = mapped_column(String(40), nullable=False, default="contact")
+
+    transport_company: Mapped[TransportCompany] = relationship(back_populates="contact_requests")

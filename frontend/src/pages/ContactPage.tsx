@@ -26,8 +26,10 @@ const ContactPage = () => {
       });
       toast.success("Message sent successfully!");
       form.reset();
-    } catch {
-      toast.error("Failed to send message. Please try again.");
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to send message. Please try again.";
+      toast.error(message);
     } finally {
       setLoading(false);
     }

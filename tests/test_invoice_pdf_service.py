@@ -1,7 +1,9 @@
 from datetime import UTC, date, datetime
 from decimal import Decimal
+from io import BytesIO
 
 import pytest
+from _pytest.monkeypatch import MonkeyPatch
 
 from src.core.exceptions import AppException
 from src.models.company import Company
@@ -11,45 +13,49 @@ from src.services.invoice_pdf import InvoicePDFService
 
 
 class _FakeCanvas:
-    def __init__(self, buffer, pagesize):
+    def __init__(self, buffer: BytesIO, pagesize: tuple[float, float]) -> None:
         self._buffer = buffer
         self._pagesize = pagesize
 
-    def setFont(self, *_args, **_kwargs):
+    def setFont(self, *_args: object, **_kwargs: object) -> None:
         return None
 
-    def drawString(self, *_args, **_kwargs):
+    def drawString(self, *_args: object, **_kwargs: object) -> None:
         return None
 
-    def drawCentredString(self, *_args, **_kwargs):
+    def drawCentredString(self, *_args: object, **_kwargs: object) -> None:
         return None
 
-    def drawRightString(self, *_args, **_kwargs):
+    def drawRightString(self, *_args: object, **_kwargs: object) -> None:
         return None
 
-    def rect(self, *_args, **_kwargs):
+    def rect(self, *_args: object, **_kwargs: object) -> None:
         return None
 
-    def showPage(self):
+    def showPage(self) -> None:
         return None
 
-    def setFillColorRGB(self, *_args, **_kwargs):
+    def setFillColorRGB(self, *_args: object, **_kwargs: object) -> None:
         return None
 
-    def line(self, *_args, **_kwargs):
+    def line(self, *_args: object, **_kwargs: object) -> None:
         return None
 
-    def save(self):
+    def setLineWidth(self, *_args: object, **_kwargs: object) -> None:
+        return None
+
+    def save(self) -> None:
         self._buffer.write(b"%PDF-FAKE")
 
 
 @pytest.fixture
-def invoice_fixture_data():
+def invoice_fixture_data() -> tuple[Invoice, Company, list[Trip]]:
     company = Company(
         name="Sikar Cargo",
         address="Dubai",
         email="ops@sikar.example.com",
         phone="+971551234567",
+        trn="100000000000006",
         contact_person="Mohammed",
         po_box="100",
         paid_amount=Decimal("0.00"),
@@ -102,33 +108,53 @@ def invoice_fixture_data():
     return invoice, company, trips
 
 
-def test_generate_template_a_pdf(monkeypatch, invoice_fixture_data):
+def test_generate_template_a_pdf(
+    monkeypatch: MonkeyPatch,
+    invoice_fixture_data: tuple[Invoice, Company, list[Trip]],
+) -> None:
     invoice, company, trips = invoice_fixture_data
 
     monkeypatch.setattr(
         InvoicePDFService,
         "_reportlab_modules",
-        classmethod(lambda cls: {"A4": (595.0, 842.0), "mm": 2.834, "canvas": type("C", (), {"Canvas": _FakeCanvas})}),
+        classmethod(
+            lambda cls: {
+                "A4": (595.0, 842.0),
+                "mm": 2.834,
+                "canvas": type("C", (), {"Canvas": _FakeCanvas}),
+            },
+        ),
     )
 
     payload = InvoicePDFService.generate_pdf(invoice, company, trips, "template_a")
     assert payload.startswith(b"%PDF")
 
 
-def test_generate_template_b_pdf(monkeypatch, invoice_fixture_data):
+def test_generate_template_b_pdf(
+    monkeypatch: MonkeyPatch,
+    invoice_fixture_data: tuple[Invoice, Company, list[Trip]],
+) -> None:
     invoice, company, trips = invoice_fixture_data
 
     monkeypatch.setattr(
         InvoicePDFService,
         "_reportlab_modules",
-        classmethod(lambda cls: {"A4": (595.0, 842.0), "mm": 2.834, "canvas": type("C", (), {"Canvas": _FakeCanvas})}),
+        classmethod(
+            lambda cls: {
+                "A4": (595.0, 842.0),
+                "mm": 2.834,
+                "canvas": type("C", (), {"Canvas": _FakeCanvas}),
+            },
+        ),
     )
 
     payload = InvoicePDFService.generate_pdf(invoice, company, trips, "template_b")
     assert payload.startswith(b"%PDF")
 
 
-def test_generate_pdf_rejects_unknown_template(invoice_fixture_data):
+def test_generate_pdf_rejects_unknown_template(
+    invoice_fixture_data: tuple[Invoice, Company, list[Trip]],
+) -> None:
     invoice, company, trips = invoice_fixture_data
 
     with pytest.raises(AppException):

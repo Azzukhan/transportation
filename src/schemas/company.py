@@ -10,6 +10,7 @@ class CompanyBase(ORMModel):
     address: str
     email: EmailStr
     phone: str = Field(max_length=20)
+    trn: str = Field(max_length=30)
     contact_person: str = Field(max_length=25)
     po_box: str = Field(max_length=20)
 
@@ -23,6 +24,7 @@ class CompanyUpdate(ORMModel):
     address: str | None = None
     email: EmailStr | None = None
     phone: str | None = Field(default=None, max_length=20)
+    trn: str | None = Field(default=None, max_length=30)
     contact_person: str | None = Field(default=None, max_length=25)
     po_box: str | None = Field(default=None, max_length=20)
 

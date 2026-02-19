@@ -27,8 +27,12 @@ const QuotePage = () => {
         note: data.get("note") as string,
       });
       setSubmitted(true);
-    } catch {
-      toast.error("Failed to submit quote request. Please try again.");
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Failed to submit quote request. Please try again.";
+      toast.error(message);
     } finally {
       setLoading(false);
     }

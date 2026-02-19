@@ -32,6 +32,17 @@ export interface QuoteRequestApi {
   created_at?: string;
 }
 
+export interface QuoteRequestUpdateInput {
+  name?: string;
+  email?: string;
+  mobile?: string;
+  freight?: string;
+  origin?: string;
+  destination?: string;
+  note?: string;
+  status?: string;
+}
+
 export interface QuoteRequestInput {
   name: string;
   email: string;

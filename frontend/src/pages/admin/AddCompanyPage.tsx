@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { AnimatedSection } from "@/components/AnimatedSection";
-import { Building2, Building, Mail, Phone, UserRound, MapPin, Box } from "lucide-react";
+import { Building2, Building, Mail, Phone, UserRound, MapPin, Box, Hash } from "lucide-react";
 
-const initialForm = { name: "", address: "", email: "", phone: "", contactPerson: "", poBox: "" };
+const initialForm = { name: "", address: "", email: "", phone: "", trn: "", contactPerson: "", poBox: "" };
 
 const AddCompanyPage = () => {
   const qc = useQueryClient();
@@ -88,6 +88,17 @@ const AddCompanyPage = () => {
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
                 placeholder="+971 55 000 0000"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-semibold mb-2 block flex items-center gap-2"><Hash size={15} className="text-accent" /> TRN *</label>
+              <Input
+                className={fieldClass}
+                value={form.trn}
+                onChange={(e) => setForm({ ...form, trn: e.target.value })}
+                placeholder="100000000000000"
+                required
               />
             </div>
 

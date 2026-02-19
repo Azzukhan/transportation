@@ -15,5 +15,7 @@ async def test_auth_token_issue_and_decode(client: AsyncClient) -> None:
     assert response.status_code == 200
     body = response.json()
     assert body["token_type"] == "bearer"
-    subject = decode_access_token(body["access_token"], get_settings())
-    assert subject == "admin"
+    cookie_token = response.cookies.get("access_token")
+    assert cookie_token
+    token_data = decode_access_token(cookie_token, get_settings())
+    assert token_data.sub == "admin"

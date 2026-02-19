@@ -11,8 +11,11 @@ dependencies = [
     "greenlet==3.1.1",
     "gunicorn==23.0.0",
     "httpx==0.28.1",
+    "openpyxl==3.1.5",
     "pydantic-settings==2.6.1",
     "python-jose[cryptography]==3.3.0",
+    "python-multipart==0.0.20",
+    "redis==5.2.1",
     "reportlab==4.2.0",
     "sqlalchemy==2.0.36",
     "uvicorn[standard]==0.32.0",
@@ -34,7 +37,7 @@ extend-exclude = ["website/static"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
-ignore = ["E501", "B008", "UP046"]
+ignore = ["E501", "B008"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -61,6 +64,18 @@ check_untyped_defs = false
 
 [[tool.mypy.overrides]]
 module = ["jose", "jose.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+    "openpyxl",
+    "openpyxl.*",
+    "reportlab",
+    "reportlab.*",
+    "svglib",
+    "svglib.*",
+    "cairosvg",
+]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

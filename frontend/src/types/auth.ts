@@ -5,8 +5,6 @@ export interface AuthUser {
 }
 
 export interface AuthState {
-  accessToken: string | null;
-  refreshToken: string | null;
   user: AuthUser | null;
   isAuthenticated: boolean;
 }
@@ -23,23 +21,23 @@ export interface SignupUserPayload {
 }
 
 export interface LoginSuccessPayload {
-  accessToken: string;
-  refreshToken: string | null;
   user: AuthUser;
 }
 
 export interface TokenRefreshPayload {
-  accessToken: string;
-  refreshToken: string | null;
+  user: AuthUser | null;
 }
 
 export interface AuthTokenApiResponse {
-  access_token: string;
+  access_token?: string;
   refresh_token?: string;
   token_type: string;
+  username?: string;
 }
 
 export interface RefreshTokenApiResponse {
-  access_token: string;
+  access_token?: string;
   refresh_token?: string;
+  token_type?: string;
+  username?: string;
 }

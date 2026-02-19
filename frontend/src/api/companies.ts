@@ -6,6 +6,7 @@ const mapCompanyCreatePayload = (input: CompanyCreateInput) => ({
   address: input.address,
   email: input.email,
   phone: input.phone,
+  trn: input.trn,
   contact_person: input.contactPerson,
   po_box: input.poBox,
 });

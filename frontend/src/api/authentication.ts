@@ -14,10 +14,9 @@ const isNotFound = (error: unknown): boolean =>
 
 export const loginUser = async (payload: LoginUserPayload): Promise<LoginSuccessPayload> => {
   const response = await apiClient.post<AuthTokenApiResponse>("/auth/token", payload);
+  const userName = response.data.username ?? payload.username;
   return {
-    accessToken: response.data.access_token,
-    refreshToken: response.data.refresh_token ?? null,
-    user: { username: payload.username },
+    user: { username: userName },
   };
 };
 
@@ -31,8 +30,10 @@ export const signupUser = async (payload: SignupUserPayload): Promise<void> => {
 };
 
 export const refreshToken = async (refreshTokenValue: string): Promise<TokenRefreshPayload> => {
-  const refreshed = await performRefreshToken(refreshTokenValue);
-  return { accessToken: refreshed.accessToken, refreshToken: refreshed.refreshToken };
+  void refreshTokenValue;
+  await performRefreshToken();
+  const user = await getUser();
+  return { user };
 };
 
 export const logoutUser = async (): Promise<void> => {

@@ -52,7 +52,9 @@ def upgrade() -> None:
 
     with op.batch_alter_table("invoices") as batch_op:
         batch_op.add_column(sa.Column("due_date", sa.Date(), nullable=True))
-        batch_op.add_column(sa.Column("format_key", sa.String(length=50), nullable=False, server_default="standard"))
+        batch_op.add_column(
+            sa.Column("format_key", sa.String(length=50), nullable=False, server_default="standard")
+        )
         batch_op.add_column(sa.Column("notes", sa.Text(), nullable=False, server_default=""))
         batch_op.add_column(sa.Column("paid_at", sa.DateTime(timezone=True), nullable=True))
 

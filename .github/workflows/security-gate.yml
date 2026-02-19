@@ -1,0 +1,43 @@
+name: Security Gate
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  security-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install dependencies
+        run: uv sync --extra dev
+
+      - name: Ruff lint
+        run: uv run ruff check .
+
+      - name: Run security suite
+        run: |
+          PYTHONPATH=. uv run pytest \
+            tests/test_security_config_validation.py \
+            tests/test_security_http.py \
+            tests/test_auth_rate_limit.py \
+            tests/test_auth_session_lifecycle.py \
+            tests/test_public_requests_api.py \
+            tests/test_request_protection.py \
+            tests/test_export_auth_hardening_and_audit.py \
+            tests/test_signature_security.py \
+            tests/test_invoices_api.py::test_signatory_signature_endpoint_requires_auth_and_tenant_access \
+            -q -o addopts=""

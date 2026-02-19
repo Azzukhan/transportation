@@ -6,10 +6,10 @@ import { AnimatedSection } from "@/components/AnimatedSection";
 import heroImage from "@/assets/hero-transport.jpg";
 
 const stats = [
-  { value: "14+ Years", label: "Market Experience" },
-  { value: "200K+", label: "Shipments Delivered" },
-  { value: "24x7", label: "Call Support" },
-  { value: "UAE | KSA | Qatar", label: "Coverage" },
+  { value: "14+ Years", label: "Market Experience", valueClass: "text-3xl md:text-4xl" },
+  { value: "200K+", label: "Shipments Delivered", valueClass: "text-3xl md:text-4xl" },
+  { value: "24x7", label: "Call Support", valueClass: "text-3xl md:text-4xl" },
+  { value: "UAE | KSA | Qatar", label: "Coverage", valueClass: "text-2xl md:text-3xl leading-tight" },
 ];
 
 const services = [
@@ -24,7 +24,7 @@ const services = [
 const HomePage = () => (
   <div>
     {/* Hero */}
-    <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+    <section className="relative min-h-[90vh] pt-24 md:pt-28 flex items-center overflow-hidden">
       <div className="absolute inset-0">
         <img src={heroImage} alt="Fleet of trucks on highway" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-r from-primary/95 via-primary/80 to-primary/40" />
@@ -76,8 +76,8 @@ const HomePage = () => (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {stats.map((stat, i) => (
             <AnimatedSection key={stat.label} delay={i * 0.1}>
-              <div className="bg-card rounded-xl p-6 text-center shadow-elevated">
-                <div className="font-display text-3xl md:text-4xl font-bold text-accent">{stat.value}</div>
+              <div className="bg-card rounded-xl p-6 text-center shadow-elevated h-full flex flex-col justify-center">
+                <div className={`font-display font-bold text-accent ${stat.valueClass}`}>{stat.value}</div>
                 <div className="text-sm text-muted-foreground mt-1">{stat.label}</div>
               </div>
             </AnimatedSection>

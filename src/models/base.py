@@ -35,3 +35,11 @@ class CompanyMixin:
         ForeignKey("companies.id", ondelete="CASCADE"),
         nullable=False,
     )
+
+
+class TransportCompanyMixin:
+    transport_company_id: Mapped[int] = mapped_column(
+        ForeignKey("transport_companies.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )

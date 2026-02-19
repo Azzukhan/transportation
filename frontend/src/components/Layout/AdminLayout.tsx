@@ -7,11 +7,14 @@ import {
   LayoutDashboard,
   Building2,
   Truck,
+  Users,
+  Wallet,
   FileText,
+  HandCoins,
   Mail,
   MessageSquare,
   FilePlus2,
-  MessagesSquare,
+  Signature,
   LogOut,
   ChevronLeft,
   Menu,
@@ -20,14 +23,17 @@ import {
 
 const sidebarLinks = [
   { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
-  { label: "Add Company", path: "/add_company", icon: Building2 },
-  { label: "Add Trip", path: "/add_trip", icon: Truck },
+  { label: "Companies", path: "/companies", icon: Building2 },
+  { label: "Trips", path: "/trips", icon: Truck },
+  { label: "Driver Details", path: "/drivers", icon: Users },
+  { label: "Driver Cash", path: "/driver-cash", icon: HandCoins },
+  { label: "Employee Salaries", path: "/employee-salaries", icon: Wallet },
   { label: "Create Invoice", path: "/create-invoice", icon: FilePlus2 },
-  { label: "Create Quote", path: "/create-quote", icon: MessagesSquare },
-  { label: "Paid Companies", path: "/paid-companies", icon: FileText },
-  { label: "Unpaid Companies", path: "/unpaid-companies", icon: FileText },
+  { label: "Paid Invoices", path: "/paid-companies", icon: FileText },
+  { label: "Unpaid Invoices", path: "/unpaid-companies", icon: FileText },
   { label: "Contact Requests", path: "/contact-requests", icon: Mail },
   { label: "Quote Requests", path: "/quote-requests", icon: MessageSquare },
+  { label: "Signatories", path: "/signatories", icon: Signature },
 ];
 
 export const AdminLayout = () => {

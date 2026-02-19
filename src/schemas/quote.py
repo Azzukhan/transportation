@@ -18,7 +18,14 @@ class QuoteRequestCreate(ORMModel):
 
 
 class QuoteRequestUpdate(ORMModel):
-    status: str = Field(max_length=20)
+    name: str | None = Field(default=None, max_length=120)
+    email: EmailStr | None = None
+    mobile: str | None = Field(default=None, max_length=40)
+    freight: str | None = Field(default=None, max_length=30)
+    origin: str | None = Field(default=None, max_length=255)
+    destination: str | None = Field(default=None, max_length=255)
+    note: str | None = None
+    status: str | None = Field(default=None, max_length=20)
 
 
 class QuoteRequestRead(ORMModel):

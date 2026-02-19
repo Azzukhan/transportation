@@ -1,20 +1,33 @@
 import { useMemo } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { listCompanies } from "@/api/companies";
+import { listDrivers } from "@/api/drivers";
 import { listTrips } from "@/api/trips";
 import { listInvoices } from "@/api/invoices";
+import { getDriverCashSummary } from "@/api/driverCashHandovers";
 import { AnimatedSection } from "@/components/AnimatedSection";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Building2, Truck, FileText, HandCoins, ArrowUpRight, PackageOpen } from "lucide-react";
+import { Building2, Truck, FileText, HandCoins, ArrowUpRight, PackageOpen, Users, Plus } from "lucide-react";
 
 const DashboardPage = () => {
   const companies = useQuery({ queryKey: ["companies"], queryFn: () => listCompanies() });
+  const drivers = useQuery({ queryKey: ["drivers"], queryFn: listDrivers });
   const trips = useQuery({ queryKey: ["trips"], queryFn: () => listTrips() });
   const invoicesPaid = useQuery({ queryKey: ["invoices", "paid"], queryFn: () => listInvoices("paid") });
   const invoicesUnpaid = useQuery({ queryKey: ["invoices", "unpaid"], queryFn: () => listInvoices("unpaid") });
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const monthStart = `${now.getFullYear()}-${month}-01`;
+  const monthEnd = `${now.getFullYear()}-${month}-${String(new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()).padStart(2, "0")}`;
+  const cashSummary = useQuery({
+    queryKey: ["driver-cash-summary", "month", monthStart, monthEnd],
+    queryFn: () => getDriverCashSummary({ startDate: monthStart, endDate: monthEnd }),
+  });
 
-  const loadingMetrics = companies.isLoading || trips.isLoading || invoicesPaid.isLoading || invoicesUnpaid.isLoading;
+  const loadingMetrics = companies.isLoading || trips.isLoading || invoicesPaid.isLoading || invoicesUnpaid.isLoading || cashSummary.isLoading;
 
   const totalRevenue = useMemo(() => {
     if (!invoicesPaid.data) return 0;
@@ -47,12 +60,28 @@ const DashboardPage = () => {
       iconClass: "bg-emerald-200/70 text-emerald-700 dark:bg-emerald-900/45 dark:text-emerald-300",
     },
     {
+      icon: Users,
+      label: "Drivers",
+      value: drivers.data?.length ?? 0,
+      note: "Registered driver records",
+      cardClass: "bg-indigo-50 border-indigo-100 dark:bg-indigo-950/20 dark:border-indigo-900/40",
+      iconClass: "bg-indigo-200/70 text-indigo-700 dark:bg-indigo-900/45 dark:text-indigo-300",
+    },
+    {
       icon: HandCoins,
       label: "Unpaid Invoices",
       value: invoicesUnpaid.data?.length ?? 0,
       note: "Pending collections",
       cardClass: "bg-rose-50 border-rose-100 dark:bg-rose-950/20 dark:border-rose-900/40",
       iconClass: "bg-rose-200/70 text-rose-700 dark:bg-rose-900/45 dark:text-rose-300",
+    },
+    {
+      icon: HandCoins,
+      label: "Driver Cash (Month)",
+      value: `AED ${((cashSummary.data ?? []).reduce((sum, row) => sum + Number(row.handover_amount_total), 0)).toFixed(2)}`,
+      note: "Total handover this month",
+      cardClass: "bg-teal-50 border-teal-100 dark:bg-teal-950/20 dark:border-teal-900/40",
+      iconClass: "bg-teal-200/70 text-teal-700 dark:bg-teal-900/45 dark:text-teal-300",
     },
   ];
 
@@ -99,6 +128,32 @@ const DashboardPage = () => {
               </AnimatedSection>
             ))}
       </div>
+
+      <AnimatedSection delay={0.18}>
+        <div className="bg-card rounded-2xl p-6 shadow-card border border-border/60">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="font-display font-bold text-2xl">Driver Details</h3>
+              <p className="text-sm text-muted-foreground">Quick access to registered drivers</p>
+            </div>
+            <Button asChild className="bg-accent-gradient text-accent-foreground border-0">
+              <Link to="/drivers">
+                <Plus size={14} className="mr-1" /> Add Driver
+              </Link>
+            </Button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {(drivers.data ?? []).slice(0, 8).map((driver) => (
+              <span key={driver.id} className="text-xs px-2.5 py-1 rounded-full border border-border bg-muted/25">
+                {driver.name} ({driver.mobile_number})
+              </span>
+            ))}
+            {(drivers.data ?? []).length === 0 && (
+              <span className="text-xs text-muted-foreground">No drivers registered yet.</span>
+            )}
+          </div>
+        </div>
+      </AnimatedSection>
 
       <AnimatedSection delay={0.25}>
         <div className="bg-card rounded-2xl p-6 md:p-7 shadow-card border border-border/60">

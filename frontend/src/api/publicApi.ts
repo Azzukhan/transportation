@@ -1,10 +1,19 @@
 import { apiClient } from "./apiClient";
+import { config } from "../config";
 import type {
   ContactRequestApi,
   ContactRequestInput,
   QuoteRequestApi,
   QuoteRequestInput,
+  QuoteRequestUpdateInput,
 } from "../types";
+
+const publicTenantHeaders = (): Record<string, string> => {
+  if (!config.publicTenantUuid.trim()) {
+    throw new Error("Public tenant UUID is not configured. Set VITE_PUBLIC_TENANT_UUID.");
+  }
+  return { "X-Transport-Company-UUID": config.publicTenantUuid.trim() };
+};
 
 export const submitContactRequest = async (payload: ContactRequestInput): Promise<ContactRequestApi> => {
   const response = await apiClient.post<ContactRequestApi>("/public/contact-requests", {
@@ -14,7 +23,7 @@ export const submitContactRequest = async (payload: ContactRequestInput): Promis
     subject: payload.subject,
     message: payload.message,
     source_page: payload.sourcePage ?? "contact",
-  });
+  }, { headers: publicTenantHeaders() });
   return response.data;
 };
 
@@ -27,7 +36,7 @@ export const submitQuoteRequest = async (payload: QuoteRequestInput): Promise<Qu
     origin: payload.origin,
     destination: payload.destination,
     note: payload.note ?? "",
-  });
+  }, { headers: publicTenantHeaders() });
   return response.data;
 };
 
@@ -48,5 +57,13 @@ export const updateContactRequestStatus = async (requestId: number, status: stri
 
 export const updateQuoteRequestStatus = async (requestId: number, status: string): Promise<QuoteRequestApi> => {
   const response = await apiClient.patch<QuoteRequestApi>(`/public/quote-requests/${requestId}`, { status });
+  return response.data;
+};
+
+export const updateQuoteRequest = async (
+  requestId: number,
+  payload: QuoteRequestUpdateInput,
+): Promise<QuoteRequestApi> => {
+  const response = await apiClient.patch<QuoteRequestApi>(`/public/quote-requests/${requestId}`, payload);
   return response.data;
 };

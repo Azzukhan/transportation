@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { listInvoices, markInvoicePaid, downloadInvoicePdf } from "@/api/invoices";
+import { listCompanies } from "@/api/companies";
 import { AnimatedSection } from "@/components/AnimatedSection";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,11 +21,30 @@ const CompaniesPage = ({ status }: CompaniesPageProps) => {
   const qc = useQueryClient();
   const [query, setQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortMode>("due_desc");
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
 
-  const invoices = useQuery({
-    queryKey: ["invoices", status],
-    queryFn: () => listInvoices(status),
+  const companies = useQuery({
+    queryKey: ["companies"],
+    queryFn: listCompanies,
   });
+  const invoices = useQuery({
+    queryKey: ["invoices", status, selectedCompanyId || "all"],
+    queryFn: () => listInvoices(status, selectedCompanyId ? Number(selectedCompanyId) : undefined),
+  });
+
+  const companyNamesById = useMemo(() => {
+    return new Map((companies.data ?? []).map((company) => [company.id, company.name]));
+  }, [companies.data]);
+
+  const companyOptions = useMemo(
+    () => [...(companies.data ?? [])].sort((a, b) => a.id - b.id),
+    [companies.data],
+  );
+
+  useEffect(() => {
+    if (selectedCompanyId || companyOptions.length === 0) return;
+    setSelectedCompanyId(String(companyOptions[0].id));
+  }, [companyOptions, selectedCompanyId]);
 
   const markPaid = useMutation({
     mutationFn: markInvoicePaid,
@@ -37,11 +57,11 @@ const CompaniesPage = ({ status }: CompaniesPageProps) => {
 
   const handleDownloadPdf = async (invoiceId: number) => {
     try {
-      const blob = await downloadInvoicePdf(invoiceId);
+      const { blob, filename } = await downloadInvoicePdf(invoiceId);
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `invoice-${invoiceId}.pdf`;
+      a.download = filename;
       a.click();
       URL.revokeObjectURL(url);
     } catch {
@@ -54,7 +74,8 @@ const CompaniesPage = ({ status }: CompaniesPageProps) => {
     const q = query.trim().toLowerCase();
     const searched = q
       ? list.filter((inv) => {
-          const hay = `${inv.id} ${inv.company_name ?? ""} ${inv.start_date} ${inv.end_date} ${inv.due_date}`.toLowerCase();
+          const displayCompanyName = inv.company_name ?? companyNamesById.get(inv.company_id) ?? "";
+          const hay = `${inv.id} ${displayCompanyName} ${inv.start_date} ${inv.end_date} ${inv.due_date}`.toLowerCase();
           return hay.includes(q);
         })
       : list;
@@ -77,7 +98,7 @@ const CompaniesPage = ({ status }: CompaniesPageProps) => {
           return dueB - dueA;
       }
     });
-  }, [invoices.data, query, sortBy]);
+  }, [invoices.data, query, sortBy, companyNamesById]);
 
   const isPaid = status === "paid";
 
@@ -108,6 +129,20 @@ const CompaniesPage = ({ status }: CompaniesPageProps) => {
                 placeholder="Search by company, invoice id, or date"
                 className="pl-9"
               />
+            </div>
+            <div className="w-full md:w-72">
+              <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select company" />
+                </SelectTrigger>
+                <SelectContent>
+                  {companyOptions.map((company) => (
+                    <SelectItem key={company.id} value={String(company.id)}>
+                      #{company.id} - {company.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="w-full md:w-56">
               <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortMode)}>
@@ -153,7 +188,7 @@ const CompaniesPage = ({ status }: CompaniesPageProps) => {
                       className="border-t border-border/60 hover:bg-muted/40 transition-colors"
                     >
                       <td className="px-4 py-3">#{inv.id}</td>
-                      <td className="px-4 py-3">{inv.company_name ?? `Company #${inv.company_id}`}</td>
+                      <td className="px-4 py-3">{inv.company_name ?? companyNamesById.get(inv.company_id) ?? `Company #${inv.company_id}`}</td>
                       <td className="px-4 py-3">{inv.start_date} - {inv.end_date}</td>
                       <td className="px-4 py-3">{inv.due_date}</td>
                       <td className="px-4 py-3 font-semibold">

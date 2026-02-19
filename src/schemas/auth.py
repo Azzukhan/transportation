@@ -7,5 +7,13 @@ class LoginInput(BaseModel):
 
 
 class TokenResponse(BaseModel):
-    access_token: str
     token_type: str = "bearer"
+    username: str | None = None
+
+
+class RefreshTokenInput(BaseModel):
+    refresh_token: str
+
+
+class MeResponse(BaseModel):
+    username: str

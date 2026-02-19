@@ -6,8 +6,14 @@ from src.models.trip import Trip
 
 class InvoiceService:
     @staticmethod
-    def generate_invoice_number(invoice_id: int) -> str:
-        return f"TAX/IN/{invoice_id}"
+    def generate_invoice_number(invoice_id: int, custom_invoice_number: str | None = None) -> str:
+        prefix = "TAX/IN/"
+        if custom_invoice_number and custom_invoice_number.strip():
+            normalized = custom_invoice_number.strip().upper()
+            if normalized.startswith(prefix):
+                return normalized
+            return f"{prefix}{custom_invoice_number.strip()}"
+        return f"{prefix}{invoice_id}"
 
     @staticmethod
     def summarize_trips(trips: list[Trip]) -> dict[str, Decimal | datetime]:

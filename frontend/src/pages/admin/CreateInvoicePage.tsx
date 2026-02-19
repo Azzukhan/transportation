@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createInvoice } from "@/api/invoices";
+import { createInvoice, downloadSignatorySignature, listSignatories } from "@/api/invoices";
 import { listCompanies } from "@/api/companies";
 import { listTrips } from "@/api/trips";
 import { AnimatedSection } from "@/components/AnimatedSection";
@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { FileText, CalendarRange, Building2 } from "lucide-react";
+import { FileText, CalendarRange, Building2, Signature } from "lucide-react";
 
 const CreateInvoicePage = () => {
   const qc = useQueryClient();
@@ -23,15 +23,52 @@ const CreateInvoicePage = () => {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [dueDate, setDueDate] = useState("");
+  const [invoiceNumber, setInvoiceNumber] = useState("");
+  const [preparedByMode, setPreparedByMode] = useState<"without_signature" | "with_signature">("without_signature");
+  const [signatoryId, setSignatoryId] = useState("");
+  const [signatoryPreviewUrl, setSignatoryPreviewUrl] = useState<string | null>(null);
   const [formatKey, setFormatKey] = useState("standard");
   const [selectedTripIds, setSelectedTripIds] = useState<number[]>([]);
 
   const companies = useQuery({ queryKey: ["companies"], queryFn: listCompanies });
+  const signatories = useQuery({ queryKey: ["signatories"], queryFn: listSignatories });
   const companyNumericId = companyId ? Number(companyId) : undefined;
+  const selectedSignatory = useMemo(
+    () => signatories.data?.find((item) => String(item.id) === signatoryId),
+    [signatories.data, signatoryId],
+  );
+
+  useEffect(() => {
+    let canceled = false;
+    let urlToRevoke: string | null = null;
+    const load = async () => {
+      if (preparedByMode !== "with_signature" || !signatoryId || !selectedSignatory?.has_signature) {
+        setSignatoryPreviewUrl(null);
+        return;
+      }
+      try {
+        const { blob } = await downloadSignatorySignature(Number(signatoryId));
+        const url = URL.createObjectURL(blob);
+        if (canceled) {
+          URL.revokeObjectURL(url);
+          return;
+        }
+        urlToRevoke = url;
+        setSignatoryPreviewUrl(url);
+      } catch {
+        if (!canceled) setSignatoryPreviewUrl(null);
+      }
+    };
+    void load();
+    return () => {
+      canceled = true;
+      if (urlToRevoke) URL.revokeObjectURL(urlToRevoke);
+    };
+  }, [preparedByMode, selectedSignatory?.has_signature, signatoryId]);
 
   const trips = useQuery({
     queryKey: ["trips", companyNumericId],
-    queryFn: () => listTrips(companyNumericId),
+    queryFn: () => listTrips({ companyId: companyNumericId }),
     enabled: Boolean(companyNumericId),
   });
 
@@ -101,10 +138,17 @@ const CreateInvoicePage = () => {
       toast.error("Please select at least one trip.");
       return;
     }
+    if (preparedByMode === "with_signature" && !signatoryId) {
+      toast.error("Please select a signatory.");
+      return;
+    }
 
     mutation.mutate({
       companyId: companyNumericId,
       dueDate: dueDate || undefined,
+      invoiceNumber: invoiceNumber.trim() || undefined,
+      preparedByMode,
+      signatoryId: preparedByMode === "with_signature" && signatoryId ? Number(signatoryId) : undefined,
       formatKey,
       tripIds: selectedTripIds,
       startDate: fromDate || undefined,
@@ -163,6 +207,15 @@ const CreateInvoicePage = () => {
               <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
             </div>
             <div>
+              <label className="text-sm font-semibold mb-2 block">Invoice Number</label>
+              <Input
+                type="text"
+                value={invoiceNumber}
+                onChange={(e) => setInvoiceNumber(e.target.value)}
+                placeholder="Optional custom invoice no."
+              />
+            </div>
+            <div>
               <label className="text-sm font-semibold mb-2 block">Template</label>
               <Select value={formatKey} onValueChange={setFormatKey}>
                 <SelectTrigger>
@@ -170,8 +223,62 @@ const CreateInvoicePage = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="standard">Standard</SelectItem>
+                  <SelectItem value="template_c">Detailed Multi-Page</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            <div>
+              <label className="text-sm font-semibold mb-2 block flex items-center gap-2"><Signature size={15} className="text-accent" /> Prepare By</label>
+              <Select
+                value={preparedByMode}
+                onValueChange={(value: "without_signature" | "with_signature") => {
+                  setPreparedByMode(value);
+                  if (value === "without_signature") {
+                    setSignatoryId("");
+                  }
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select mode" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="without_signature">Without Signature</SelectItem>
+                  <SelectItem value="with_signature">With Signature</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-semibold mb-2 block">Signature</label>
+              <Select
+                value={signatoryId}
+                onValueChange={setSignatoryId}
+                disabled={preparedByMode !== "with_signature"}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={preparedByMode === "with_signature" ? "Select signatory" : "Enable with signature first"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {signatories.data?.map((signatory) => (
+                    <SelectItem key={signatory.id} value={String(signatory.id)}>
+                      {signatory.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {preparedByMode === "with_signature" ? (
+                signatoryPreviewUrl ? (
+                  <div className="mt-2 rounded-lg border border-border/60 bg-muted/20 p-2.5">
+                    <p className="text-xs text-muted-foreground mb-1">Selected signature preview</p>
+                    <img
+                      src={signatoryPreviewUrl}
+                      alt={`${selectedSignatory?.name ?? "Signatory"} signature`}
+                      className="h-14 w-full max-w-[220px] rounded bg-white object-contain border border-border/60"
+                    />
+                  </div>
+                ) : signatoryId ? (
+                  <p className="mt-2 text-xs text-muted-foreground">No signature image found for selected signatory.</p>
+                ) : null
+              ) : null}
             </div>
           </div>
 

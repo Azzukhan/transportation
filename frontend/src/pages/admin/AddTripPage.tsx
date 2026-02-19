@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createTrip } from "@/api/trips";
 import { listCompanies } from "@/api/companies";
+import { listDrivers } from "@/api/drivers";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -15,14 +16,22 @@ const initialForm = {
   freight: "",
   origin: "",
   destination: "",
+  destinationCompanyName: "",
+  tripCategory: "domestic",
   amount: "",
   tollGate: "",
-  driver: "",
+  driverMode: "registered",
+  driverId: "",
+  otherDriverName: "",
+  otherDriverMobile: "",
 };
+
+const freightOptions = ["1 - Ton", "3 - Ton", "7 - Ton", "10 - Ton", "Truck"];
 
 const AddTripPage = () => {
   const qc = useQueryClient();
   const companies = useQuery({ queryKey: ["companies"], queryFn: listCompanies });
+  const drivers = useQuery({ queryKey: ["drivers"], queryFn: listDrivers });
   const [form, setForm] = useState(initialForm);
 
   const completed = useMemo(() => {
@@ -42,15 +51,31 @@ const AddTripPage = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (form.driverMode === "registered" && !form.driverId) {
+      toast.error("Please select a registered driver.");
+      return;
+    }
+    if (form.driverMode === "other" && !form.otherDriverName.trim()) {
+      toast.error("Please enter other driver name.");
+      return;
+    }
     mutation.mutate({
       companyId: Number(form.companyId),
       date: form.date,
       freight: form.freight,
       origin: form.origin,
       destination: form.destination,
+      destinationCompanyName: form.destinationCompanyName || undefined,
+      tripCategory: form.tripCategory as "domestic" | "international",
       amount: Number(form.amount),
       tollGate: Number(form.tollGate),
-      driver: form.driver,
+      driver:
+        form.driverMode === "registered"
+          ? drivers.data?.find((d) => String(d.id) === form.driverId)?.name || ""
+          : form.otherDriverName,
+      driverId: form.driverMode === "registered" && form.driverId ? Number(form.driverId) : undefined,
+      externalDriverName: form.driverMode === "other" ? form.otherDriverName : undefined,
+      externalDriverMobile: form.driverMode === "other" ? form.otherDriverMobile : undefined,
     });
   };
 
@@ -78,7 +103,7 @@ const AddTripPage = () => {
               <span className="text-muted-foreground">{completed}/8 fields</span>
             </div>
             <div className="h-2 rounded-full bg-muted overflow-hidden">
-              <div className="h-full bg-accent-gradient transition-all" style={{ width: `${(completed / 8) * 100}%` }} />
+              <div className="h-full bg-accent-gradient transition-all" style={{ width: `${(completed / 11) * 100}%` }} />
             </div>
           </div>
 
@@ -104,7 +129,33 @@ const AddTripPage = () => {
               </div>
               <div>
                 <label className="text-sm font-semibold mb-2 block flex items-center gap-2"><Package size={15} className="text-accent" /> Freight Type *</label>
-                <Input className={fieldClass} value={form.freight} onChange={(e) => setForm({ ...form, freight: e.target.value })} placeholder="General cargo" required />
+                <Select value={form.freight} onValueChange={(v) => setForm({ ...form, freight: v })}>
+                  <SelectTrigger className={fieldClass}>
+                    <SelectValue placeholder="Select freight type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {freightOptions.map((item) => (
+                      <SelectItem key={item} value={item}>
+                        {item}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-semibold mb-2 block">Trip Category *</label>
+                <Select
+                  value={form.tripCategory}
+                  onValueChange={(v) => setForm({ ...form, tripCategory: v as "domestic" | "international" })}
+                >
+                  <SelectTrigger className={fieldClass}>
+                    <SelectValue placeholder="Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="domestic">Domestic (with VAT)</SelectItem>
+                    <SelectItem value="international">International (without VAT)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <label className="text-sm font-semibold mb-2 block flex items-center gap-2"><MapPin size={15} className="text-accent" /> Origin *</label>
@@ -113,6 +164,15 @@ const AddTripPage = () => {
               <div>
                 <label className="text-sm font-semibold mb-2 block flex items-center gap-2"><Navigation size={15} className="text-accent" /> Destination *</label>
                 <Input className={fieldClass} value={form.destination} onChange={(e) => setForm({ ...form, destination: e.target.value })} placeholder="Delivery city" required />
+              </div>
+              <div className="md:col-span-2">
+                <label className="text-sm font-semibold mb-2 block">Destination Company Name (Optional)</label>
+                <Input
+                  className={fieldClass}
+                  value={form.destinationCompanyName}
+                  onChange={(e) => setForm({ ...form, destinationCompanyName: e.target.value })}
+                  placeholder="Destination company name"
+                />
               </div>
               <div>
                 <label className="text-sm font-semibold mb-2 block flex items-center gap-2"><CircleDollarSign size={15} className="text-accent" /> Amount (AED) *</label>
@@ -124,7 +184,53 @@ const AddTripPage = () => {
               </div>
               <div className="md:col-span-2">
                 <label className="text-sm font-semibold mb-2 block flex items-center gap-2"><UserRound size={15} className="text-accent" /> Driver *</label>
-                <Input className={fieldClass} value={form.driver} onChange={(e) => setForm({ ...form, driver: e.target.value })} placeholder="Driver full name" required />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <Select
+                    value={form.driverMode}
+                    onValueChange={(v) => setForm({ ...form, driverMode: v, driverId: "", otherDriverName: "", otherDriverMobile: "" })}
+                  >
+                    <SelectTrigger className={fieldClass}>
+                      <SelectValue placeholder="Driver type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="registered">Registered Driver</SelectItem>
+                      <SelectItem value="other">Other Driver</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  {form.driverMode === "registered" ? (
+                    <div className="md:col-span-2">
+                      <Select value={form.driverId} onValueChange={(v) => setForm({ ...form, driverId: v })}>
+                        <SelectTrigger className={fieldClass}>
+                          <SelectValue placeholder="Select registered driver" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {drivers.data?.map((d) => (
+                            <SelectItem key={d.id} value={String(d.id)}>
+                              {d.name} ({d.mobile_number})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  ) : (
+                    <>
+                      <Input
+                        className={fieldClass}
+                        value={form.otherDriverName}
+                        onChange={(e) => setForm({ ...form, otherDriverName: e.target.value })}
+                        placeholder="Other driver name"
+                        required={form.driverMode === "other"}
+                      />
+                      <Input
+                        className={fieldClass}
+                        value={form.otherDriverMobile}
+                        onChange={(e) => setForm({ ...form, otherDriverMobile: e.target.value })}
+                        placeholder="Other driver mobile"
+                      />
+                    </>
+                  )}
+                </div>
               </div>
             </div>
 
