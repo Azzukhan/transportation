@@ -10,6 +10,7 @@ from src.core.exceptions import AppException
 from src.core.signature_crypto import get_signature_crypto
 from src.handlers.invoice import InvoiceHandler
 from src.models.signatory import Signatory
+from src.models.transport_company import TransportCompany
 from src.schemas.invoice import (
     InvoiceCreate,
     InvoiceMarkPaid,
@@ -329,7 +330,9 @@ async def download_invoice_pdf(
     invoice, company, trips = await handler.get_invoice_bundle(
         session, current_admin.transport_company_id, invoice_id
     )
-    pdf_bytes = InvoicePDFService.generate_pdf(invoice, company, trips, template_key)
+    tc = await session.get(TransportCompany, current_admin.transport_company_id)
+    tc_trn = tc.trn if tc else ""
+    pdf_bytes = InvoicePDFService.generate_pdf(invoice, company, trips, template_key, tc_trn)
     safe_company_name = (
         re.sub(r"[^a-z0-9]+", "-", company.name.lower()).strip("-") or f"company-{company.id}"
     )

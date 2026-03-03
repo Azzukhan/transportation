@@ -126,7 +126,9 @@ def test_generate_template_a_pdf(
         ),
     )
 
-    payload = InvoicePDFService.generate_pdf(invoice, company, trips, "template_a")
+    payload = InvoicePDFService.generate_pdf(
+        invoice, company, trips, "template_a", "100000000000099"
+    )
     assert payload.startswith(b"%PDF")
 
 
@@ -148,7 +150,9 @@ def test_generate_template_b_pdf(
         ),
     )
 
-    payload = InvoicePDFService.generate_pdf(invoice, company, trips, "template_b")
+    payload = InvoicePDFService.generate_pdf(
+        invoice, company, trips, "template_b", "100000000000099"
+    )
     assert payload.startswith(b"%PDF")
 
 

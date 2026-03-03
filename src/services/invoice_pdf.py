@@ -37,17 +37,18 @@ class InvoicePDFService:
         company: Company,
         trips: list[Trip],
         template_key: str | None = None,
+        transport_company_trn: str = "",
     ) -> bytes:
         selected = (template_key or invoice.format_key or "template_a").lower()
         if selected == "standard":
             selected = "template_a"
 
         if selected == "template_a":
-            return cls._template_a(invoice, company, trips)
+            return cls._template_a(invoice, company, trips, transport_company_trn)
         if selected == "template_b":
-            return cls._template_b(invoice, company, trips)
+            return cls._template_b(invoice, company, trips, transport_company_trn)
         if selected in {"template_c", "detailed"}:
-            return cls._template_c(invoice, company, trips)
+            return cls._template_c(invoice, company, trips, transport_company_trn)
 
         raise AppException(f"Unsupported template key: {selected}", status_code=400)
 
@@ -166,7 +167,7 @@ class InvoicePDFService:
         return cast(float, y - (4 * mm))
 
     @classmethod
-    def _template_a(cls, invoice: Invoice, company: Company, trips: list[Trip]) -> bytes:
+    def _template_a(cls, invoice: Invoice, company: Company, trips: list[Trip], transport_company_trn: str = "") -> bytes:
         modules = cls._reportlab_modules()
         page_width, page_height = modules["A4"]
         mm = modules["mm"]
@@ -197,7 +198,7 @@ class InvoicePDFService:
         c.drawCentredString(page_width / 2, y, "TAX INVOICE")
         y -= 4.6 * mm
         c.setFont("Helvetica-Bold", 9)
-        c.drawCentredString(page_width / 2, y, f"TRN:- {company.trn or '-'}")
+        c.drawCentredString(page_width / 2, y, f"TRN:- {transport_company_trn or '-'}")
 
         # Block 3 (separate row): invoice metadata on left.
         y -= 8 * mm
@@ -313,7 +314,7 @@ class InvoicePDFService:
         return buffer.getvalue()
 
     @classmethod
-    def _template_b(cls, invoice: Invoice, company: Company, trips: list[Trip]) -> bytes:
+    def _template_b(cls, invoice: Invoice, company: Company, trips: list[Trip], transport_company_trn: str = "") -> bytes:
         modules = cls._reportlab_modules()
         page_width, page_height = modules["A4"]
         mm = modules["mm"]
@@ -341,6 +342,8 @@ class InvoicePDFService:
         c.drawRightString(
             page_width - 16 * mm, y, f"Date: {invoice.generated_at.date().isoformat()}"
         )
+        y -= 5 * mm
+        c.drawString(16 * mm, y, f"TRN: {transport_company_trn or '-'}")
         y -= 5 * mm
         c.drawString(16 * mm, y, f"Bill To: {company.contact_person}")
         c.drawRightString(page_width - 16 * mm, y, f"Due: {invoice.due_date.isoformat()}")
@@ -384,7 +387,7 @@ class InvoicePDFService:
         return buffer.getvalue()
 
     @classmethod
-    def _template_c(cls, invoice: Invoice, company: Company, trips: list[Trip]) -> bytes:
+    def _template_c(cls, invoice: Invoice, company: Company, trips: list[Trip], transport_company_trn: str = "") -> bytes:
         modules = cls._reportlab_modules()
         page_width, page_height = modules["A4"]
         mm = modules["mm"]
@@ -440,7 +443,7 @@ class InvoicePDFService:
                 y -= 4.1 * mm
                 c.drawString(14 * mm, y, f"Invoice Date :- {invoice_date}")
                 y -= 4.1 * mm
-                c.drawString(14 * mm, y, f"TRN:- {company.trn or '-'}")
+                c.drawString(14 * mm, y, f"TRN:- {transport_company_trn or '-'}")
             else:
                 y -= 2.5 * mm
                 c.setFont("Helvetica-Bold", 9)
